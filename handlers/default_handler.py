@@ -3,7 +3,6 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 import misc
 from handlers.allstat import MainMenu
 from misc import dp
-import globalset
 import fastdb
 
 current_mess: int
@@ -19,6 +18,11 @@ current_id: int
 #     with open('testfile.jpg', 'wb') as f:
 #         f.write(b.getvalue())
 
+
+@dp.message_handler(lambda message: message.text.lower() == "господь господь", state='*')
+async def send_catalog(message: types.Message):
+    await message.answer("иии...")
+    await misc.bot.send_message(message.from_user.id, "Иисус Христоc")
 
 @dp.message_handler(content_types=types.ContentTypes.TEXT, state=MainMenu.Wait_menu_pick)
 async def all_other_messages(message: types.Message):

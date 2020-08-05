@@ -7,6 +7,9 @@ from misc import dp
 class StateAdminMenu(StatesGroup):
     admin_main_menu = State()
     waiting_redadd = State()
+    waiting_admin_redset = State()
+    waiting_num_sett = State()
+    waiting_newnum_sett = State()
 
 
 class OrderAddPos(StatesGroup):
@@ -37,6 +40,8 @@ class OrderRedPos(StatesGroup):
 class MainMenu(StatesGroup):
     Wait_menu_pick = State()
 
+class Card(StatesGroup):
+    card_wait = State()
 
 class OrderKatalog(StatesGroup):
     waiting_katalog_section = State()

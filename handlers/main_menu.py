@@ -3,20 +3,27 @@ from aiogram.types import ReplyKeyboardMarkup
 
 import dbfunc
 import fastdb
-import globalset
 from ui import keyboards, strings
-from handlers.allstat import MainMenu, OrderKatalog, StateAdminMenu
+from handlers.allstat import MainMenu, OrderKatalog, StateAdminMenu, Card
 from misc import dp
 import misc
 
 
 @dp.message_handler(commands=['start'], state='*')
 async def cmd_start(message: types.Message):
+    userinfo = dbfunc.get_user(message.from_user.id)
     is_admin = fastdb.is_admin(message.from_user.id)
     if is_admin:
         mes_text = "Привет, админ\nИнфа десериализируется, лаве инкрементируется"
     else:
-        mes_text = "Доброго времени суток"
+        if userinfo:
+            mes_text = f"Уже здоровались, {userinfo[0][2]}"
+        else:
+            mes_text = f"Будем знакомы, {message.from_user.first_name}"
+            dbfunc.add_user(message.from_user.id, message.from_user.first_name,
+                            message.from_user.full_name, 0, '0')
+            print(message.from_user.id, message.from_user.first_name,
+                  message.from_user.full_name, 0, '0')
     print(mes_text)
     await message.answer(mes_text, reply_markup=keyboards.get_main_menu_rkeyb(is_admin))
 
@@ -50,13 +57,29 @@ async def send_catalog(message: types.Message):
             iter += 1
             cash += int(elem[3]) * int(elem[4])
             mes_text += f'{str(iter)}. {elem[2]}: {str(elem[3])}шт. ({str(int(elem[3]) * int(elem[4]))})\n'
+        mes_text += f'\nОбщая сумма: {str(cash)}р.'
+        await message.answer(mes_text, reply_markup=keyboards.get_card_ikeyb())
     else:
         mes_text += 'Корзина пуста'
-    mes_text += f'\nОбщая сумма: {str(cash)}р.'
-    await message.answer(mes_text, reply_markup=keyboards.get_card_ikeyb())
+        mes_text += f'\nОбщая сумма: {str(cash)}р.'
+        await message.answer(mes_text)
+    await Card.card_wait.set()
 
 
 @dp.message_handler(lambda message: message.text == "акции", state='*')
 async def send_catalog(message: types.Message):
-    await message.answer(strings.KATALOG_SELECT_RAZDEL, reply_markup=keyboards.get_catalog_section_rkeyb())
-    await OrderKatalog.waiting_katalog_section.set()
+    balls = dbfunc.get_balls_fromuser(message.from_user.id)
+    mes_text = "5% с каждого заказа возвращается вам в виде балов!\n\n" \
+               "Баллов на вашем счету: " + str(balls)
+    await message.answer(mes_text)
+
+
+@dp.message_handler(lambda message: message.text == "активные заказы", state='*')
+async def send_zaklist(message: types.Message):
+    mes_text = dbfunc.get_activezakazes_text(message.from_user.id)
+    await message.answer(mes_text)
+
+
+@dp.message_handler(content_types=['photo'], state='*')
+async def step_getphoto(message: types.InputMediaPhoto):
+    print(message.photo[0].file_id)

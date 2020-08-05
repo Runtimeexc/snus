@@ -1,7 +1,6 @@
 from aiogram import executor, Dispatcher
 
 import fastdb
-import globalset
 import misc
 from misc import dp
 import handlers

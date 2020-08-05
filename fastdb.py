@@ -4,13 +4,16 @@ from classes import Position, CatalogBuf
 # 777027968
 # 244432423 Паша
 # 538011007 Колян
-ALL_ADMINS = [777027968]
+ALL_ADMINS = [538011007]
 
 ALL_POSITIONS = []
 ALL_SECTIONS = []
 ALL_FSECTIONS = []
 CATALOG_BUFFER = CatalogBuf()
-DOSTAVKA_COST = 200
+DOSTAVKA_COST = 5000
+BONUS_PERCENT = 5
+CURRENT_RED_POSITION = Position
+CURRENT_RED_POSITION_OLDNAME = str
 
 ##############
 # refreshers #
@@ -51,7 +54,6 @@ def refresh_fsections():
         if isad:
             ALL_FSECTIONS.append(pos.fsection)
 
-
 def is_admin(tid: int):
     return tid in ALL_ADMINS
 
@@ -68,6 +70,11 @@ def is_fsection(fsection: str):
 ##############
 # getters    #
 ##############
+
+def get_admin_settings():
+    text = f"1. Цена доставки: {str(DOSTAVKA_COST)}\n2. Процент бонуса: {BONUS_PERCENT}"
+    return text
+
 def get_colcost_sklad():
     colsklad = 0
     costsklad = 0
@@ -75,6 +82,11 @@ def get_colcost_sklad():
         colsklad += pos.col
         costsklad += pos.col * pos.cost
     return [colsklad, costsklad]
+
+def get_fsection_from_section(fsection):
+    for pos in ALL_POSITIONS:
+        if fsection == pos.fsection:
+            return pos.section
 
 
 def get_fsections_from_section(section: str):
